@@ -1,20 +1,27 @@
 # Common QCOM configuration tools
 $(call inherit-product, device/qcom/common/Android.mk)
 
-DEVICE_PACKAGE_OVERLAYS += device/xiaomi/cancro/overlay
-
 LOCAL_PATH := device/xiaomi/cancro
+
+DEVICE_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay
 
 PRODUCT_CHARACTERISTICS := nosdcard
 
 # USB
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
-    persist.sys.usb.config=mtp,adb \
-    camera2.portability.force_api=1
+    persist.sys.usb.config=mtp
+
+# set USB OTG enabled to add support for USB storage type
+PRODUCT_PROPERTY_OVERRIDES += \
+    persist.sys.isUsbOtgEnabled=1
 
 # Charger
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/rootdir/root/chargeonlymode:root/sbin/chargeonlymode
+
+# Quick charging
+PRODUCT_PROPERTY_OVERRIDES += \
+    persist.usb.hvdcp.detect=true
 
 # Ramdisk
 PRODUCT_PACKAGES += \
@@ -77,8 +84,13 @@ PRODUCT_PROPERTY_OVERRIDES += \
     persist.rild.nitz_short_ons_2="" \
     persist.rild.nitz_short_ons_3=""
 
-#camera
-PRODUCT_PACKAGES += camera.msm8974
+# Camera
+PRODUCT_PACKAGES += \
+    camera.msm8974
+
+# Camera api
+PRODUCT_PROPERTY_OVERRIDES += \
+    camera2.portability.force_api=1
 
 # Power
 PRODUCT_PACKAGES += \
@@ -111,9 +123,16 @@ PRODUCT_PACKAGES += \
     hostapd.accept \
     hostapd.deny
 
-# Adaptive Multi-Rate Wideband
+# Enable Adaptive Multi-Rate Wideband
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.ril.enable.amr.wideband=1
+
+# KeyLayout
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/keylayout/atmel-maxtouch.kl:system/usr/keylayout/atmel-maxtouch.kl \
+    $(LOCAL_PATH)/keylayout/gpio-keys.kl:system/usr/keylayout/gpio-keys.kl \
+    $(LOCAL_PATH)/keylayout/msm8974-taiko-mtp-snd-card_Button_Jack.kl:system/usr/keylayout/msm8974-taiko-mtp-snd-card_Button_Jack.kl \
+    $(LOCAL_PATH)/keylayout/synaptics_rmi4_i2c.kl:system/usr/keylayout/synaptics_rmi4_i2c.kl
 
 # SoftAP
 PRODUCT_PACKAGES += \
@@ -141,11 +160,17 @@ PRODUCT_PACKAGES += \
     Tag
 
 PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/nfc/nfcchecker.sh:/install/bin/nfcchecker.sh
+
+PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.nfc.hce.xml:system/etc/permissions/android.hardware.nfc.hce.xml \
     frameworks/native/data/etc/android.hardware.nfc.xml:system/etc/permissions/android.hardware.nfc.xml \
     $(LOCAL_PATH)/nfc/libnfc-brcm.conf:system/etc/libnfc-brcm.conf \
     $(LOCAL_PATH)/nfc/libnfc-brcm-20791b05.conf:system/etc/libnfc-brcm-20791b05.conf \
     $(LOCAL_PATH)/nfc/nfcee_access_debug.xml:system/etc/nfcee_access.xml
+
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.nfc.port=I2C
 
 # Thermal config
 PRODUCT_COPY_FILES += \
@@ -165,7 +190,7 @@ PRODUCT_COPY_FILES += \
 # Audio
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/audio/audio_policy.conf:system/etc/audio_policy.conf \
-	$(LOCAL_PATH)/audio/audio_effects.conf:system/etc/audio_effects.conf \
+    $(LOCAL_PATH)/audio/audio_effects.conf:system/etc/audio_effects.conf \
     $(LOCAL_PATH)/audio/init.qcom.audio.sh:system/etc/init.qcom.audio.sh \
     $(LOCAL_PATH)/audio/listen_platform_info.xml:system/etc/listen_platform_info.xml \
     $(LOCAL_PATH)/audio/mixer_paths.xml:system/etc/mixer_paths.xml \
@@ -235,28 +260,24 @@ PRODUCT_PROPERTY_OVERRIDES += \
     persist.audio.fluence.speaker=true \
     audio.offload.pcm.enable=false
 
-#Enable more sensor
+# Enable more sensor
 PRODUCT_PROPERTY_OVERRIDES += \
-    ro.qualcomm.sensors.qmd=true \
-    ro.qualcomm.sensors.smd=true \
-    ro.qualcomm.sensors.cmc=true \
-    ro.qualcomm.sensors.vmd=true \
-    ro.qualcomm.sensors.gtap=true \
-    ro.qualcomm.sensors.pedometer=true \
-    ro.qualcomm.sensors.pam=true \
-    ro.qualcomm.sensors.scrn_ortn=true \
-    ro.qualcomm.sensors.georv=true \
-    ro.qualcomm.sensors.game_rv=true \
-    ro.qc.sensors.step_detector=true \
-    ro.qc.sensors.step_counter=true \
-    ro.qc.sensors.max_geomag_rotvec=true \
-    debug.qualcomm.sns.hal=w \
+    ro.qti.sensors.qmd=true \
+    ro.qti.sensors.smd=true \
+    ro.qti.sensors.cmc=true \
+    ro.qti.sensors.vmd=true \
+    ro.qti.sensors.gtap=true \
+    ro.qti.sensors.pedometer=true \
+    ro.qti.sensors.pam=true \
+    ro.qti.sensors.scrn_ortn=true \
+    ro.qti.sensors.georv=true \
+    ro.qti.sensors.game_rv=true \
+    ro.qti.sensors.step_detector=true \
+    ro.qti.sensors.step_counter=true \
+    ro.qti.sensors.max_geomag_rotv=60 \
+    persist.debug.sensors.hal=w \
     debug.qualcomm.sns.daemon=w \
     debug.qualcomm.sns.libsensor1=w
-
-#Doze Mode
-PRODUCT_PACKAGES += \
-    CancroDoze
 
 # Filesystem management tools
 PRODUCT_PACKAGES += \
@@ -288,13 +309,8 @@ PRODUCT_PROPERTY_OVERRIDES += \
 PRODUCT_PACKAGES += \
     keystore.msm8974
 
-# IR package
-PRODUCT_PACKAGES += \
-    consumerir.msm8974
-
 # FM Radio
 PRODUCT_PACKAGES += \
-    libqcomfm_jni \
     qcom.fmradio
 
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -318,7 +334,7 @@ PRODUCT_PACKAGES += \
     com.dsi.ant.antradio_library \
     libantradio
 
-#Bluetooth
+# Bluetooth
 PRODUCT_PROPERTY_OVERRIDES += \
     qcom.bt.dev_power_class=1 \
     bluetooth.hfp.client=1 \
@@ -332,7 +348,6 @@ endif
 
 # System properties
 PRODUCT_PROPERTY_OVERRIDES += \
-    ro.nfc.port=I2C \
     ro.fm.transmitter=false \
     com.qc.hardware=true \
     persist.demo.hdmirotationlock=false \
@@ -383,7 +398,6 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.sensor.stepcounter.xml:system/etc/permissions/android.hardware.sensor.stepcounter.xml \
     frameworks/native/data/etc/android.hardware.sensor.stepdetector.xml:system/etc/permissions/android.hardware.sensor.stepdetector.xml \
     frameworks/native/data/etc/android.hardware.touchscreen.multitouch.jazzhand.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.jazzhand.xml \
-    frameworks/native/data/etc/android.hardware.consumerir.xml:system/etc/permissions/android.hardware.consumerir.xml \
     frameworks/native/data/etc/android.hardware.usb.accessory.xml:system/etc/permissions/android.hardware.usb.accessory.xml \
     frameworks/native/data/etc/android.hardware.usb.host.xml:system/etc/permissions/android.hardware.usb.host.xml \
     frameworks/native/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml \
@@ -393,12 +407,8 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.ethernet.xml:system/etc/permissions/android.hardware.ethernet.xml \
     frameworks/native/data/etc/android.software.print.xml:system/etc/permissions/android.software.print.xml
 
-ADDITIONAL_DEFAULT_PROPERTIES += \
-ro.secure=0 \
-ro.adb.secure=0
-
-# Device uses high-density artwork where available
-PRODUCT_AAPT_CONFIG := normal hdpi xhdpi xxhdpi
+# Screen density
+PRODUCT_AAPT_CONFIG := normal
 PRODUCT_AAPT_PREF_CONFIG := xxhdpi
 
 ifneq ($(QCPATH),)

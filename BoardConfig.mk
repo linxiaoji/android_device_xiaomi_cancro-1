@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2014 The CyanogenMod Project
+# Copyright (C) 2015 The CyanogenMod Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 BOARD_VENDOR := xiaomi
 
 CANCRO_PATH := device/xiaomi/cancro
+
+# ReleaseTools
+TARGET_RELEASETOOLS_EXTENSIONS := $(CANCRO_PATH)/releasetools
 
 # Include path
 TARGET_SPECIFIC_HEADER_PATH := $(CANCRO_PATH)/include
@@ -34,16 +37,17 @@ TARGET_ARCH := arm
 TARGET_ARCH_VARIANT := armv7-a-neon
 TARGET_CPU_ABI := armeabi-v7a
 TARGET_CPU_ABI2 := armeabi
+TARGET_CPU_SMP := true
 TARGET_CPU_VARIANT := krait
 TARGET_USE_QCOM_BIONIC_OPTIMIZATION := true
 
 # Flags
-COMMON_GLOBAL_CFLAGS += -D__ARM_USE_PLD -D__ARM_CACHE_LINE_SIZE=64  -DUSE_RIL_VERSION_10
-COMMON_GLOBAL_CPPFLAGS += -DNO_SECURE_DISCARD -DUSE_RIL_VERSION_10
+COMMON_GLOBAL_CFLAGS += -DNO_SECURE_DISCARD -D__ARM_USE_PLD -D__ARM_CACHE_LINE_SIZE=64
+COMMON_GLOBAL_CPPFLAGS += -DNO_SECURE_DISCARD
 
 # Kernel
 BOARD_CUSTOM_BOOTIMG_MK := $(CANCRO_PATH)/mkbootimg.mk
-BOARD_KERNEL_CMDLINE := console=ttyHSL0,115200,n8 vmalloc=340M androidboot.hardware=qcom user_debug=31 msm_rtb.filter=0x37 ehci-hcd.park=3 androidboot.bootdevice=msm_sdcc.1
+BOARD_KERNEL_CMDLINE := console=none vmalloc=340M androidboot.hardware=qcom user_debug=31 msm_rtb.filter=0x37 ehci-hcd.park=3
 BOARD_KERNEL_SEPARATED_DT := true
 BOARD_KERNEL_BASE        := 0x00000000
 BOARD_KERNEL_PAGESIZE    := 2048
@@ -64,7 +68,17 @@ TARGET_POWERHAL_SET_INTERACTIVE_EXT := $(CANCRO_PATH)/power/power_ext.c
 
 # Audio
 BOARD_USES_ALSA_AUDIO := true
+TARGET_USES_QCOM_MM_AUDIO := true
 AUDIO_FEATURE_ENABLED_MULTI_VOICE_SESSIONS := true
+AUDIO_FEATURE_ENABLED_FLUENCE := true
+AUDIO_FEATURE_ENABLED_MULTIPLE_TUNNEL := true
+AUDIO_FEATURE_PCM_IOCTL_ENABLED := true
+AUDIO_FEATURE_ENABLED_PCM_OFFLOAD := true
+AUDIO_FEATURE_ENABLED_PCM_OFFLOAD_24 := true
+AUDIO_FEATURE_ENABLED_PROXY_DEVICE := true
+AUDIO_FEATURE_ENABLED_USBAUDIO := true
+AUDIO_FEATURE_ENABLED_SPKR_PROTECTION := true
+BOARD_FORTEMEDIA_QDSP_ENABLED := true
 
 # FM Radio
 QCOM_FM_ENABLED := true
@@ -87,6 +101,8 @@ OVERRIDE_RS_DRIVER := libRSDriver_adreno.so
 HAVE_ADRENO_SOURCE:= false
 VSYNC_EVENT_PHASE_OFFSET_NS := 7500000
 SF_VSYNC_EVENT_PHASE_OFFSET_NS := 5000000
+
+TARGET_USE_ION_COMPAT := true
 
 # Shader cache config options
 # Maximum size of the  GLES Shaders that can be cached for reuse.
@@ -153,23 +169,23 @@ TARGET_HW_DISK_ENCRYPTION := false
 # Added to indicate that protobuf-c is supported in this build
 PROTOBUF_SUPPORTED := true
 
+# Compatibility with pre-kitkat Qualcomm sensor HALs
+SENSORS_NEED_SETRATE_ON_ENABLE := true
+
+
 # ANT+
 BOARD_ANT_WIRELESS_DEVICE := "vfs-prerelease"
 
 # Include an expanded selection of fonts
 EXTENDED_FONT_FOOTPRINT := true
 
-# Flags
-COMMON_GLOBAL_CFLAGS += -DNO_SECURE_DISCARD
-
-# Consumer IR
-TARGET_PROVIDES_CONSUMERIR_HAL := true
-
 # Simple time service client
 BOARD_USES_QC_TIME_SERVICES := true
 
 # Charger
 BOARD_CHARGER_ENABLE_SUSPEND := true
+
+BOARD_HAS_NO_SELECT_BUTTON := true
 
 # Enable dex-preoptimization to speed up first boot sequence
 ifeq ($(HOST_OS),linux)
@@ -187,39 +203,5 @@ include device/qcom/sepolicy/sepolicy.mk
 
 BOARD_SEPOLICY_DIRS += \
         $(CANCRO_PATH)/sepolicy
-
-BOARD_SEPOLICY_UNION += \
-	adbd.te \
-	adsprpcd.te \
-	audiod.te \
-	bootanim.te \
-	charger_monitor.te \
-	debuggerd.te \
-	drmserver.te \
-	file.te \
-	file_contexts \
-	init.te \
-	keystore.te \
-	lmkd.te \
-	location.te \
-	mediaserver.te \
-	mm-qcamerad.te \
-	net.te \
-	nfc.te \
-	platform_app.te \
-	property.te \
-	property_contexts \
-	qmuxd.te \
-	rfs_access.te \
-	sdcardd.te \
-	sensors.te \
-	system_app.te \
-	system_server.te \
-	tee.te \
-	thermald.te \
-	time_daemon.te \
-	ueventd.te \
-	untrusted_app.te \
-	wcnss_service.te
 
 -include vendor/xiaomi/cancro/BoardConfigVendor.mk
